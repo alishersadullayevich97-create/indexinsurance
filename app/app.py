@@ -292,9 +292,10 @@ with right:
     with st.container(border=True):
         st.markdown("**Rasmiy tarif** — dissertatsiya 3.2.2-jadvali "
                     "(shartli ozod 10%, tuman hosildorlik indeksi)")
-        o1, o2, o3, o4 = st.columns(4)
+        o1, o2 = st.columns(2)
         o1.metric("Sof tarif", f"{row['sof_tarif']:.2f}%")
         o2.metric("Zona", str(row["zone"]))
+        o3, o4 = st.columns(2)
         o3.metric("To'lov chastotasi", f"{row['chastota_pct']:.0f}%")
         o4.metric("HE (tuman indeksi)", f"{row['HE_tuman']:.1f}%")
 
