@@ -1,0 +1,10 @@
+# Pinned to the versions this app was tested against (2026-09-28).
+# Upper bounds stop Streamlit Cloud from pulling a future release that
+# removes an API this code depends on.
+streamlit>=1.50,<2.0
+streamlit-folium>=0.22,<1.0
+folium>=0.17,<1.0
+plotly>=5.22,<8.0
+numpy>=1.26,<3.0
+pandas>=2.2,<4.0
+scipy>=1.13,<2.0
