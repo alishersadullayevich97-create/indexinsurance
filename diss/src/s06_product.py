@@ -5,7 +5,7 @@ Dissertatsiyaning 2.4 va 3.1-3.2 bo'limlari.
 import numpy as np
 import pandas as pd
 from config import (DEDUCTIBLE, RISK_LOADING, SUBSIDY_RATE, SUBSIDY_CAP,
-                    LOSS_THRESHOLD, HIGH_RISK_ZONE)
+                    LOSS_THRESHOLD, HIGH_RISK_ZONE, ZONE_SD_MIN, ZONE_R_MAX)
 
 
 def attach_province_index(panel, province):
@@ -88,18 +88,31 @@ def basis_risk_table(panel, threshold=LOSS_THRESHOLD):
 def tariff(pure_rate, loading=RISK_LOADING, subsidy=SUBSIDY_RATE, cap=SUBSIDY_CAP):
     """Sof tarifdan yakuniy fermer to'loviga.
 
-    Subsidiya mukofotning belgilangan ulushi, ammo sug'urta summasining
-    cap foizidan oshmaydi - amaldagi normativ talab.
+    Subsidiya mukofotning belgilangan ulushi (VM 206-son qarori, 15-ilova: 50%).
+    cap berilsa, subsidiya sug'urta summasining cap foizidan oshmaydi
+    (2024-2026 yillardagi tartib, VM 373-son qarori: 4,0%); cap=None - chegarasiz.
     """
     loaded = pure_rate * (1 + loading)
-    sub = min(subsidy * loaded, cap)
+    raw = subsidy * loaded
+    sub = raw if cap is None else min(raw, cap)
     return {"sof": round(pure_rate, 2), "yuklamali": round(loaded, 2),
             "subsidiya": round(sub, 2), "fermer": round(loaded - sub, 2),
-            "chegara_ishladi": subsidy * loaded > cap}
+            "chegara_ishladi": cap is not None and raw > cap}
+
+
+def high_risk_districts(panel, sd_min=ZONE_SD_MIN, r_max=ZONE_R_MAX):
+    """Yuqori xavf zonasi: anomaliya SD > sd_min va viloyat bilan r < r_max (3.2.3)."""
+    out = []
+    for name, g in panel.groupby("district"):
+        if g.anom.std(ddof=1) > sd_min and g.anom.corr(g.vanom) < r_max:
+            out.append(name)
+    return sorted(out)
 
 
 def zone_tariffs(panel, deductible=DEDUCTIBLE, high_risk=HIGH_RISK_ZONE):
-    """Tarif zonalari bo'yicha hisob-kitob."""
+    """Tarif zonalari bo'yicha hisob-kitob (high_risk=None - mezon bo'yicha)."""
+    if high_risk is None:
+        high_risk = high_risk_districts(panel)
     sim = simulate_index(panel, deductible, "district")
     zones = {"Barqaror zona": ~sim.district.isin(high_risk),
              "Yuqori xavf zonasi": sim.district.isin(high_risk),
@@ -108,7 +121,7 @@ def zone_tariffs(panel, deductible=DEDUCTIBLE, high_risk=HIGH_RISK_ZONE):
     for zname, mask in zones.items():
         g = sim[mask]
         t = tariff(g.payout.mean())
-        rows.append({"zona": zname, **t,
+        rows.append({"zona": zname, "tumanlar": g.district.nunique(), **t,
                      "HE_pct": round(hedging_effectiveness(g.loss, g.payout), 1),
                      "chastota_pct": round((g.payout > 0).mean() * 100, 0)})
     return pd.DataFrame(rows)

@@ -4,7 +4,7 @@ SACRA v2.0 — district-level pipeline
 
 Inputs
 ------
-  diss/                         dissertation repository v1.0.0 (unchanged):
+  diss/                         dissertation repository v1.1.0 (unchanged):
                                 wheat panel, ERA5-Land climate, analysis code
   data/sacra_districts.geojson  district boundaries from GEE
 
@@ -37,7 +37,7 @@ from sacra_core import (Gumbel, AreaYieldContract, commercial_premium,
 # ----------------------------------------------------------------------
 # Paths are resolved from this file's location, not the current working
 # directory, so the script behaves the same whether it is run from the
-# repository root, from app/, or by Claude Code.
+# repository root or from app/.
 #
 #   indexinsurance/
 #   ├── data/     <- inputs
@@ -63,7 +63,7 @@ COVERAGE   = 0.80      # trigger at 80% of reference yield
 EXIT_LEVEL = 0.40      # full payout at 40%
 TSI        = 1_000_000 # sum insured per hectare (UZS)
 CLIMATE_VARS = ["heat35", "heat30", "t_max_abs", "rh_min_mean", "precip_sum"]
-MIN_YEARS  = 10        # a district with fewer years is not priced
+MIN_YEARS  = 8         # diss config.MIN_YEARS_TREND bilan bir xil (Bandixon v1.1.0 da 9 yil)
 TARGET_P   = 0.15      # design target: contract triggers ~1 year in 7
 AUTO_COVER = True      # derive coverage per district from TARGET_P
 
@@ -139,9 +139,8 @@ def official_tariffs():
     """
     from s01_data import load_province, load_districts, load_climate
     from s02_detrend import detrend_series, detrend_panel
-    from s06_product import attach_province_index, zone_tariffs
+    from s06_product import attach_province_index, zone_tariffs, high_risk_districts
     from s07_tables import district_table
-    from config import HIGH_RISK_ZONE
 
     v = load_province()
     res = detrend_series(v.year, v.production_t)
@@ -151,9 +150,9 @@ def official_tariffs():
     panel = attach_province_index(panel, v)
 
     dt = district_table(panel).rename(columns={"tuman": "district"})
-    dt["zone"] = np.where(dt["district"].isin(HIGH_RISK_ZONE),
-                          "Yuqori xavf", "Barqaror")
-    return dt, zone_tariffs(panel)
+    hr = high_risk_districts(panel)        # v1.1.0: zona mezon bo'yicha (SD > 14%, r < 0,5)
+    dt["zone"] = np.where(dt["district"].isin(hr), "Yuqori xavf", "Barqaror")
+    return dt, zone_tariffs(panel, high_risk=hr)
 
 
 # ----------------------------------------------------------------------

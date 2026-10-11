@@ -13,7 +13,7 @@ indexinsurance/
 │   ├── sacra_core.py      Gumbel stsenariy modeli
 │   ├── sacra_pipeline.py  diss/ → app/results/ konveyeri
 │   └── results/           Hisoblangan natijalar (ilova shu yerdan o'qiydi)
-├── diss/                  Dissertatsiya tahlil zanjiri v1.0.0 — O'ZGARTIRILMAYDI
+├── diss/                  Dissertatsiya tahlil zanjiri v1.1.0 — O'ZGARTIRILMAYDI
 ├── data/                  Xarita chegaralari (GEE eksporti)
 └── gee/                   Google Earth Engine skriptlari (arxiv)
 ```
@@ -39,4 +39,4 @@ Keyin `app/results/` ni commit qiling — Streamlit Cloud shu fayllarni o'qiydi.
 `diss/` papkasini yangi versiya bilan to'liq almashtiring, konveyerni qayta
 ishga tushiring, commit qiling.
 
-© Abdullayev Alisher Sa'dulla o'g'li · DGU № 60955 · DOI 10.5281/zenodo.22933347
+© Abdullayev Alisher Sa'dulla o'g'li · DGU № 60955 · DOI 10.5281/zenodo.23300567

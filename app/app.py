@@ -101,8 +101,8 @@ priced = results[results["status"] == "ok"].copy()   # Gumbel checks passed
 st.title("SACRA — Surxondaryo agroiqlim risk analizatori")
 st.caption(
     "Tuman hosildorlik indeksiga asoslangan parametrik sug'urta · "
-    "rasmiy tariflar: dissertatsiya tahlil zanjiri v1.0.0 "
-    "(DOI 10.5281/zenodo.22933347) · DGU № 60955 · INDEXINSURANCE.UZ"
+    "rasmiy tariflar: dissertatsiya tahlil zanjiri v1.1.0 "
+    "(DOI 10.5281/zenodo.23300567) · DGU № 60955 · INDEXINSURANCE.UZ"
 )
 
 c1, c2, c3, c4 = st.columns(4)
@@ -180,7 +180,6 @@ with st.sidebar:
         "HE_tuman": "Xedjlash samaradorligi, % (dissertatsiya)",
         "sd_pct": "Hosildorlik anomaliyasi SD, %",
         "pure_rate": "Gumbel stsenariy: sof stavka",
-        "CVaR99": "Gumbel stsenariy: CVaR 99%, kg/ga",
         "r_heat35": "r (35°C+ kunlar – hosildorlik)",
     }
     metric = st.selectbox(
@@ -292,9 +291,10 @@ with right:
     with st.container(border=True):
         st.markdown("**Rasmiy tarif** — dissertatsiya 3.2.2-jadvali "
                     "(shartli ozod 10%, tuman hosildorlik indeksi)")
-        o1, o2, o3, o4 = st.columns(4)
+        o1, o2 = st.columns(2)
         o1.metric("Sof tarif", f"{row['sof_tarif']:.2f}%")
         o2.metric("Zona", str(row["zone"]))
+        o3, o4 = st.columns(2)
         o3.metric("To'lov chastotasi", f"{row['chastota_pct']:.0f}%")
         o4.metric("HE (tuman indeksi)", f"{row['HE_tuman']:.1f}%")
 
@@ -302,6 +302,7 @@ with right:
     st.markdown("#### Stsenariy kalkulyatori (Gumbel)")
     st.caption(
         "Yon paneldagi shartlar bilan muqobil shartnomani modellashtiradi. "
+        "Tuman qatorlari (9–19 yil) ekstremal qiymatlar modeli uchun qisqa — natija faqat taqqoslash uchun. "
         "To'lov shkalasi va yuklamalar rasmiy mahsulotdan farq qiladi, "
         "shuning uchun natija rasmiy tarifga teng bo'lmaydi."
     )
@@ -439,7 +440,7 @@ with right:
 
 st.divider()
 st.caption(
-    "Rasmiy tariflar dissertatsiya tahlil zanjiri (v1.0.0) orqali tarixiy "
+    "Rasmiy tariflar dissertatsiya tahlil zanjiri (v1.1.0) orqali tarixiy "
     "imitatsiya usulida hisoblangan. Stsenariy kalkulyatori Gumbel (EV-I) "
     "modeliga asoslangan qo'shimcha vosita. Kichik namuna sharoitida barcha "
     "baholar noaniqlikka ega — shartnoma tuzishdan oldin aktuar ekspertizasi "

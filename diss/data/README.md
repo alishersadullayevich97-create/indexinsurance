@@ -21,8 +21,12 @@ statistika boshqarmasi.
 
 **Sifat bo'yicha eslatmalar.** 2006-yil barcha tumanlarda hisobot uzilishi
 sababli tahlildan chiqariladi. Bandixon tumani 2011–2019-yillarda Qiziriq
-tarkibida bo'lgan. Qiziriq bo'yicha 2024-yil maydoni anomal. Ushbu qoidalar
-`src/s01_data.py` da avtomatik qo'llanadi.
+tarkibida bo'lgan. 2010-yil — o'tish yili: faylda Bandixon uchun 5 821,5 ga
+maydonda 0 t hosil, Qiziriq uchun 72,9 s/ga qayd etilgan (ikkalasi birgalikda
+48,2 s/ga), ya'ni Bandixon hosili Qiziriq hisobotiga yozilgan; shu sababli ikkala
+tumanning 2010-yil kuzatuvi chiqariladi (v1.1.0). Qiziriq bo'yicha 2024-yil
+maydoni anomal. Fayldagi asl qiymatlar o'zgartirilmagan — ushbu qoidalar
+`src/config.py` da e'lon qilingan va `src/s01_data.py` da avtomatik qo'llanadi.
 
 ## `climate_annual_era5.csv`
 ERA5-Land reanalizidan olingan tuman-yil iqlim indekslari (mart–iyun).

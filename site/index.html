@@ -231,14 +231,15 @@ html[lang="en"] [data-uz]{display:none}
 
     <div class="rows">
       <div class="row">
-        <div class="k"><span data-en>Climate database</span><span data-uz>Iqlim bazasi</span></div>
+        <div class="k"><span data-en>Yield and climate data</span><span data-uz>Hosildorlik va iqlim ma'lumotlari</span></div>
         <div class="v"><p>
-          <span data-en>District-level series from 1981 onward: wind, temperature,
-          precipitation and vegetation indices, aligned to the crop calendar and
-          reconciled against station records.</span>
-          <span data-uz>1981-yildan boshlab tuman kesimidagi qatorlar: shamol,
-          harorat, yog'in va vegetatsiya indekslari — ekin kalendariga moslangan
-          va stansiya yozuvlari bilan solishtirilgan.</span>
+          <span data-en>Official district wheat statistics for 2005–2024, aligned
+          with ERA5-Land climate indices for the March–June growing window. Every
+          data-quality rule is published with the code.</span>
+          <span data-uz>2005–2024-yillar uchun tumanlar bo'yicha rasmiy bug'doy
+          statistikasi, mart–iyun vegetatsiya oynasi uchun ERA5-Land iqlim
+          indekslari bilan moslashtirilgan. Ma'lumot sifati bo'yicha har bir qoida
+          kod bilan birga e'lon qilingan.</span>
         </p></div>
       </div>
       <div class="row">
@@ -266,12 +267,12 @@ html[lang="en"] [data-uz]{display:none}
       <div class="row">
         <div class="k"><span data-en>Capital requirement</span><span data-uz>Kapital talabi</span></div>
         <div class="v"><p>
-          <span data-en>CVaR at 99% and probable maximum loss per district, so a
-          portfolio can be sized and a reinsurance layer placed against a number
-          rather than a guess.</span>
-          <span data-uz>Har tuman uchun 99% darajadagi CVaR va ehtimoliy maksimal
-          yo'qotish — portfelni o'lchash va qayta sug'urta qatlamini taxminga
-          emas, raqamga tayanib joylashtirish uchun.</span>
+          <span data-en>CVaR at 99% and the 1-in-100 shortfall at provincial level,
+          where the series is long enough for extreme-value estimates. District
+          series are too short for a separate tail fit.</span>
+          <span data-uz>Viloyat darajasida 99% CVaR va 100 yilda bir kutiladigan
+          kamomad — bu qator ekstremal qiymatlar bahosi uchun yetarlicha uzun.
+          Tuman qatorlari alohida quyruq modeli uchun qisqa.</span>
         </p></div>
       </div>
     </div>
@@ -305,7 +306,7 @@ html[lang="en"] [data-uz]{display:none}
         </p>
         <p style="margin-top:26px">
           <!-- TODO: replace with your Streamlit URL -->
-          <a class="cta" href="https://sacra.streamlit.app" target="_blank" rel="noopener">
+          <a class="cta" href="https://sacra-uz.streamlit.app" target="_blank" rel="noopener">
             <span data-en>Open the calculator</span><span data-uz>Kalkulyatorni ochish</span>
           </a>
         </p>
@@ -430,6 +431,10 @@ html[lang="en"] [data-uz]{display:none}
           <span data-uz>«EHM uchun yaratilgan dasturlar va ma'lumotlar bazalarining
           huquqiy himoyasi to'g'risida»gi Qonun</span>
         </dd>
+        <dt><span data-en>Version</span><span data-uz>Versiya</span></dt>
+        <dd>SACRA v1.1.0 · <a href="https://doi.org/10.5281/zenodo.23300567" target="_blank" rel="noopener">doi:10.5281/zenodo.23300567</a></dd>
+        <dt><span data-en>Code and data</span><span data-uz>Kod va ma'lumotlar</span></dt>
+        <dd><a href="https://github.com/alishersadullayevich97-create/sacra-index-insurance" target="_blank" rel="noopener">github.com/alishersadullayevich97-create/sacra-index-insurance</a></dd>
         <dt>ORCID</dt>
         <dd><a href="https://orcid.org/0009-0003-9607-680X" target="_blank" rel="noopener">0009-0003-9607-680X</a></dd>
       </dl>
@@ -453,8 +458,8 @@ html[lang="en"] [data-uz]{display:none}
       javob beriladi.</span>
     </p>
 
-    <!-- Replace YOUR_FORM_ID after creating a free form at formspree.io -->
-    <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <!-- Contact form handled by Formspree -->
+    <form action="https://formspree.io/f/xkjgkvnv" method="POST">
       <label for="name"><span data-en>Name</span><span data-uz>Ism</span></label>
       <input id="name" name="name" type="text" required autocomplete="name">
 

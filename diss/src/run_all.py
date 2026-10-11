@@ -10,9 +10,10 @@ from s01_data import load_province, load_districts, load_climate, load_station
 from s02_detrend import detrend_series, detrend_panel
 from s03_climate import pearson_table, two_way_within
 from s04_robustness import jackknife_correlation, permutation_test, partial_correlation
-from s05_evt import (loss_series, fit_gumbel, check_gev_stability, return_levels,
+from s05_evt import (loss_series, fit_gumbel, check_gev_stability, gev_profile_likelihood, return_levels,
                      bootstrap_return_levels, var_cvar)
-from s06_product import attach_province_index, simulate_index, summarise, basis_risk_table, zone_tariffs
+from s06_product import (attach_province_index, simulate_index, summarise, basis_risk_table, zone_tariffs,
+                         high_risk_districts)
 from s07_tables import (panel_fe_table, effect_size, window_evt, event_return_period, evt_tariffs,
                        district_table, province_anomaly_sd, simulate_heat_index, deductible_table)
 from scipy import stats
@@ -67,6 +68,11 @@ def main():
     gev = check_gev_stability(L)
     print(f"GEV xi = {gev['xi']:+.3f}, CI = [{gev['ci_low']:+.2f}, {gev['ci_high']:+.2f}] "
           f"-> {'aniqlangan' if gev['identified'] else 'ANIQLANMAGAN, Gumbel tanlanadi'}")
+    pl = gev_profile_likelihood(L)
+    print(f"Profil ehtimollik: xi = {pl['xi']:+.3f}, 95% CI = [{pl['ci_low']:+.3f}, {pl['ci_high']:+.3f}]; "
+          f"Gumbelga nisbatan LR = {pl['LR']:.3f}, p = {pl['p']:.3f} "
+          f"(log-ehtimollik: GEV {pl['ll_gev']:.2f}, Gumbel {pl['ll_gumbel']:.2f})")
+    pd.DataFrame([pl]).to_csv(OUT / "gev_profile.csv", index=False)
     g = fit_gumbel(L)
     print(f"Gumbel: mu = {g['mu']:,.0f}, sigma = {g['sigma']:,.0f}\n")
     rl = return_levels(g["dist"], mean_production=mp); print(rl.to_string(index=False))
@@ -87,8 +93,10 @@ def main():
           f"({tot.qoplangan/tot.zarar_yillari*100:.0f}%)")
     br.to_csv(OUT / "basis_risk.csv", index=False)
 
-    zt = zone_tariffs(panel)
-    print("\nTarif zonalari:"); print(zt.to_string(index=False))
+    hr = high_risk_districts(panel)
+    zt = zone_tariffs(panel, high_risk=hr)
+    print(f"\nYuqori xavf zonasi (SD > 14%, r < 0,5): {', '.join(hr)}")
+    print("Tarif zonalari:"); print(zt.to_string(index=False))
     zt.to_csv(OUT / "zone_tariffs.csv", index=False)
 
     # --- Qo'shimcha dissertatsiya jadvallari (s07_tables) ---
@@ -103,7 +111,8 @@ def main():
     et = evt_tariffs(g["dist"], L, mp); print("\n2.3.3 - viloyat tariflari, %:"); print(et.to_string(index=False))
     dt = district_table(panel); print(f"\n2.4.1/2.4.3/3.2.2 - tumanlar (viloyat anomaliyasi SD = {province_anomaly_sd(v)}%):")
     print(dt.to_string(index=False))
-    hi = simulate_heat_index(panel); print("\n3.1.2 - issiqlik indeksi mahsuloti:"); print(hi.to_string(index=False))
+    hi = simulate_heat_index(panel, beta=b)
+    print(f"\n3.1.2 - issiqlik indeksi mahsuloti (beta = {b:.3f}):"); print(hi.to_string(index=False))
     dd = deductible_table(panel); print("\n3.1.4 - shartli ozod sezgirligi:"); print(dd.to_string(index=False))
     for name, df in [("panel_fe", fe), ("evt_window_2010", rl15), ("evt_tariffs", et), ("districts", dt),
                      ("heat_index_product", hi), ("deductible", dd)]:

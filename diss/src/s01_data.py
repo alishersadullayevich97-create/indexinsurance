@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 from config import (WHEAT, CLIMATE, STATION, EXCLUDE_YEAR, BANDIXON_MERGED,
-                    QIZIRIQ_ANOMALY, PROVINCE_ROW, CITY_ROW)
+                    TRANSITION_2010, QIZIRIQ_ANOMALY, PROVINCE_ROW, CITY_ROW)
 
 
 def load_province() -> pd.DataFrame:
@@ -15,9 +15,11 @@ def load_province() -> pd.DataFrame:
 def load_districts() -> pd.DataFrame:
     """Tumanlar panelini qaytaradi, sifat qoidalari qo'llangan holda.
 
-    Qo'llanadigan cheklovlar (dissertatsiya 2.1.1-bo'limi):
+    Qo'llanadigan cheklovlar (dissertatsiya 2.1.3-bo'limi):
       - 2006-yil butunlay chiqariladi;
       - Bandixon 2011-2019 yillarda Qiziriq tarkibida bo'lgani uchun chiqariladi;
+      - 2010-yil Bandixon va Qiziriq kuzatuvlari chiqariladi (v1.1.0): o'sha yili
+        Bandixon hosili Qiziriq hisobiga yozilgan (Bandixon 0,0 s/ga, Qiziriq 72,9 s/ga);
       - Qiziriq 2024-yil kuzatuvi anomaliya sifatida chiqariladi;
       - viloyat va shahar qatorlari tahlilga kirmaydi.
     """
@@ -26,8 +28,8 @@ def load_districts() -> pd.DataFrame:
     lo, hi = BANDIXON_MERGED
     w = w[~((w.district == "Bandixon") & (w.year.between(lo, hi)))]
     w = w[~w.district.isin([PROVINCE_ROW, CITY_ROW])].copy()
-    dname, dyear = QIZIRIQ_ANOMALY
-    w.loc[(w.district == dname) & (w.year == dyear), "yield_ts_ga"] = np.nan
+    for dname, dyear in (QIZIRIQ_ANOMALY, *TRANSITION_2010):
+        w.loc[(w.district == dname) & (w.year == dyear), "yield_ts_ga"] = np.nan
     return w.dropna(subset=["yield_ts_ga"]).reset_index(drop=True)
 
 

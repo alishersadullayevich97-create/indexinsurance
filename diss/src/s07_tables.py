@@ -109,8 +109,14 @@ def province_anomaly_sd(province):
     return round(float(np.std(detrend_series(province.year, province.yield_ts_ga)["anomaly_pct"], ddof=1)), 1)
 
 
-def simulate_heat_index(panel, beta=0.651, percentiles=(50, 60, 70, 75, 80)):
-    """3.1.2-jadval: to'lov = beta x max(0, issiq kunlar - tuman protsentili)."""
+def simulate_heat_index(panel, beta=None, percentiles=(50, 60, 70, 75, 80)):
+    """3.1.2-jadval: to'lov = beta x max(0, issiq kunlar - tuman protsentili).
+
+    beta=None - 2.2.5-jadvaldagi tuman va yil effektli model koeffitsienti
+    (2018-yilsiz) olinadi (v1.0.0 da 0,651 qat'iy yozilgan edi).
+    """
+    if beta is None:
+        beta = abs(panel_fe_table(panel).loc[1, "beta_2018siz"])
     loss = np.maximum(0.0, -panel["anom"].to_numpy())
     rows = []
     for q in percentiles:

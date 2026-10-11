@@ -6,7 +6,7 @@ spetsifikatsiyasi tanlanadi. Bu qaror empirik tarzda tekshiriladi.
 """
 import numpy as np
 import pandas as pd
-from scipy import stats, integrate
+from scipy import stats, integrate, optimize
 from config import N_BOOTSTRAP, RANDOM_SEED
 
 
@@ -40,6 +40,65 @@ def check_gev_stability(losses, n_boot=N_BOOTSTRAP, seed=RANDOM_SEED):
     lo, hi = np.percentile(xis, [2.5, 97.5])
     return {"xi": -shape, "scale": scale, "ci_low": lo, "ci_high": hi,
             "identified": not (lo < 0 < hi)}
+
+
+def gev_profile_likelihood(losses, xi_min=-0.6, xi_max=1.2, step=0.02, level=0.95):
+    """GEV shakl parametrining profil ehtimolligi (v1.1.0; dissertatsiya 2.3.1, 2-ilova).
+
+    Har bir xi uchun mu va sigma ehtimollik bo'yicha optimallashtiriladi.
+    Natija: profil bahosi xi, chi-kvadrat(1) asosidagi ishonch oralig'i va
+    Gumbel (xi = 0) modeliga nisbatan ehtimollik nisbati testi. Kichik tanlanmada
+    erkin GEV bahosi buzilgan yechimga (sigma -> 0) tushishi mumkin; profil
+    ehtimollik bu holatdan xoli.
+    """
+    x = np.asarray(losses, dtype=float)
+    n = len(x)
+    mu_g, s_g = stats.gumbel_r.fit(x)
+
+    def nll(p, xi):
+        mu, ls = p
+        z = (x - mu) / np.exp(ls)
+        if abs(xi) < 1e-8:
+            return n * ls + z.sum() + np.exp(-z).sum()
+        t = 1 + xi * z
+        if np.any(t <= 0):
+            return 1e12
+        return n * ls + (1 + 1 / xi) * np.log(t).sum() + (t ** (-1 / xi)).sum()
+
+    cache = {}
+
+    def prof(xi, warm=None):
+        key = round(float(xi), 10)
+        if key not in cache:
+            starts = [np.array([mu_g, np.log(s_g)])] + ([warm] if warm is not None else [])
+            best = min((optimize.minimize(nll, st, args=(xi,), method="Nelder-Mead",
+                                          options={"xatol": 1e-7, "fatol": 1e-9, "maxiter": 4000})
+                        for st in starts), key=lambda r: r.fun)
+            cache[key] = (-float(best.fun), best.x)
+        return cache[key]
+
+    grid = np.round(np.arange(xi_min, xi_max + step / 2, step), 6)
+    ll = np.empty(len(grid))
+    i0 = int(np.argmin(np.abs(grid)))
+    for order in (range(i0, len(grid)), range(i0, -1, -1)):   # xi = 0 dan ikki tomonga, iliq start
+        warm = None
+        for i in order:
+            ll[i], warm = prof(grid[i], warm)
+    i = int(ll.argmax())
+    r = optimize.minimize_scalar(lambda v: -prof(v)[0], method="bounded",
+                                 bounds=(grid[max(i - 1, 0)], grid[min(i + 1, len(grid) - 1)]),
+                                 options={"xatol": 1e-5})
+    xi_hat, ll_hat = float(r.x), float(-r.fun)
+    ll_gum = prof(0.0)[0]
+    lr = max(0.0, 2 * (ll_hat - ll_gum))
+    cut = ll_hat - stats.chi2.ppf(level, 1) / 2
+    inside = grid[ll >= cut]
+    f = lambda v: prof(v)[0] - cut
+    lo = optimize.brentq(f, inside.min() - step, xi_hat, xtol=1e-5)
+    hi = optimize.brentq(f, xi_hat, inside.max() + step, xtol=1e-5)
+    return {"xi": round(xi_hat, 3), "ci_low": round(float(lo), 3), "ci_high": round(float(hi), 3),
+            "ll_gev": round(ll_hat, 2), "ll_gumbel": round(ll_gum, 2),
+            "LR": round(lr, 3), "p": round(float(stats.chi2.sf(lr, 1)), 3)}
 
 
 def return_levels(dist, periods=(10, 20, 50, 100), mean_production=None):
@@ -107,6 +166,9 @@ if __name__ == "__main__":
     gev = check_gev_stability(L)
     print(f"GEV shakl xi = {gev['xi']:+.3f}, 95% CI = [{gev['ci_low']:+.2f}, {gev['ci_high']:+.2f}]")
     print(f"Parametr aniqlanganmi: {'ha' if gev['identified'] else 'YOQ -> Gumbel tanlanadi'}\n")
+    pl = gev_profile_likelihood(L)
+    print(f"Profil ehtimollik: xi = {pl['xi']:+.3f}, 95% CI = [{pl['ci_low']:+.3f}, {pl['ci_high']:+.3f}], "
+          f"LR = {pl['LR']:.3f} (p = {pl['p']:.3f})\n")
     print(return_levels(g["dist"], mean_production=mp).to_string(index=False))
     print()
     print(var_cvar(g["dist"], mean_production=mp).to_string(index=False))
